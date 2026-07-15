@@ -1,0 +1,6 @@
+{
+  "name": "Portfolio Sviluppatore",
+  "description": "Un portfolio professionale ed elegante per uno sviluppatore e maker 3D, con effetti parallax, timeline interattiva, simulatore di stampa 3D e mini-gioco arcade.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
