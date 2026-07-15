@@ -8,11 +8,12 @@ import SlicerSimulator from './components/SlicerSimulator';
 import ArcadeGame from './components/ArcadeGame';
 import Contact from './components/Contact';
 import MiniGamesPage from './components/MiniGamesPage';
+import TacticalDefensePage from './components/TacticalDefensePage';
 import { Cpu, Printer, Gamepad2, Hammer, Layers, Github, Mail, Sparkles, Code, Terminal } from 'lucide-react';
 
 export default function App() {
   const [activeLabTab, setActiveLabTab] = useState<'hardware' | 'slicing' | 'game'>('hardware');
-  const [currentView, setCurrentView] = useState<'portfolio' | 'games'>('portfolio');
+  const [currentView, setCurrentView] = useState<'portfolio' | 'games' | 'tactical-defense'>('portfolio');
   
   // Building simulation states
   const [isBuilding, setIsBuilding] = useState(false);
@@ -139,6 +140,17 @@ export default function App() {
             className={`transition-colors cursor-pointer uppercase tracking-[0.2em] text-left ${currentView === 'games' ? 'text-brand-500 font-bold' : 'hover:text-white'}`}
           >
             Mini Giochi
+          </button>
+          <button 
+            onClick={() => {
+              triggerBuilding(() => {
+                setCurrentView('tactical-defense');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }, 'TACTICAL_DEFENSE_CORE');
+            }} 
+            className={`transition-colors cursor-pointer uppercase tracking-[0.2em] text-left ${currentView === 'tactical-defense' ? 'text-red-500 font-bold' : 'hover:text-white'}`}
+          >
+            Difesa Tattica
           </button>
         </nav>
 
@@ -283,8 +295,15 @@ export default function App() {
               <Contact />
             </div>
           </>
-        ) : (
+        ) : currentView === 'games' ? (
           <MiniGamesPage onBackToPortfolio={() => {
+            triggerBuilding(() => {
+              setCurrentView('portfolio');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 'PORTFOLIO_HOME');
+          }} />
+        ) : (
+          <TacticalDefensePage onBack={() => {
             triggerBuilding(() => {
               setCurrentView('portfolio');
               window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -303,7 +322,7 @@ export default function App() {
         <div className="flex gap-8 uppercase tracking-widest text-[10px]">
           <a href="mailto:f.lucarossi@gmail.com" className="hover:text-white transition-colors">Email</a>
           <span className="text-white/10">/</span>
-          <span className="text-white/30">Github</span>
+          <a href="https://github.com/RedLuke17" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors text-white/60">Github</a>
         </div>
         <div>© 2026 DEVELOPER_RESERVED</div>
       </footer>

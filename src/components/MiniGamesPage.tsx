@@ -836,6 +836,7 @@ function ZombieDefenseGame({ muted }: { muted: boolean }) {
 
             {/* Active Zombies Overlays (Pure vectors with custom animated glow) */}
             {enemies.map(enemy => {
+              if (!enemy) return null;
               const leftPercent = ((enemy.x + 0.5) / GRID_COLS) * 100;
               const topPercent = ((enemy.y + 0.5) / GRID_ROWS) * 100;
               const hpPercent = (enemy.hp / enemy.maxHp) * 100;

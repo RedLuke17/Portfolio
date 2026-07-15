@@ -9,26 +9,107 @@ export default function Timeline() {
   const manualTimeoutRef = useRef<any>(null);
 
   const sectionRef = useRef<HTMLDivElement | null>(null);
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ["start start", "end end"]
-  });
+  const activeYearRef = useRef(activeYear);
 
   useEffect(() => {
-    const unsubscribe = scrollYProgress.onChange((latest) => {
-      if (isManual) return;
-      if (latest < 0.25) {
-        setActiveYear(2023);
-      } else if (latest < 0.5) {
-        setActiveYear(2024);
-      } else if (latest < 0.75) {
-        setActiveYear(2025);
-      } else {
-        setActiveYear(2026);
+    activeYearRef.current = activeYear;
+  }, [activeYear]);
+
+  const cooldownRef = useRef(false);
+
+  useEffect(() => {
+    const element = sectionRef.current;
+    if (!element) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      const rect = element.getBoundingClientRect();
+      const isStickyActive = rect.top <= 75 && rect.bottom >= window.innerHeight;
+
+      if (!isStickyActive) return;
+
+      const current = activeYearRef.current;
+
+      if (e.deltaY > 0) {
+        // Scrolling down
+        if (current < 2026) {
+          e.preventDefault();
+          if (!cooldownRef.current) {
+            cooldownRef.current = true;
+            setActiveYear(current + 1);
+            setTimeout(() => {
+              cooldownRef.current = false;
+            }, 800);
+          }
+        }
+      } else if (e.deltaY < 0) {
+        // Scrolling up
+        if (current > 2023) {
+          e.preventDefault();
+          if (!cooldownRef.current) {
+            cooldownRef.current = true;
+            setActiveYear(current - 1);
+            setTimeout(() => {
+              cooldownRef.current = false;
+            }, 800);
+          }
+        }
       }
-    });
-    return () => unsubscribe();
-  }, [scrollYProgress, isManual]);
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      const rect = element.getBoundingClientRect();
+      const isStickyActive = rect.top <= 75 && rect.bottom >= window.innerHeight;
+
+      if (!isStickyActive) return;
+
+      const current = activeYearRef.current;
+      const touchY = e.touches[0].clientY;
+      const diffY = touchStartY - touchY;
+
+      if (Math.abs(diffY) < 30) return;
+
+      if (diffY > 0) {
+        if (current < 2026) {
+          if (e.cancelable) e.preventDefault();
+          if (!cooldownRef.current) {
+            cooldownRef.current = true;
+            setActiveYear(current + 1);
+            touchStartY = touchY;
+            setTimeout(() => {
+              cooldownRef.current = false;
+            }, 800);
+          }
+        }
+      } else {
+        if (current > 2023) {
+          if (e.cancelable) e.preventDefault();
+          if (!cooldownRef.current) {
+            cooldownRef.current = true;
+            setActiveYear(current - 1);
+            touchStartY = touchY;
+            setTimeout(() => {
+              cooldownRef.current = false;
+            }, 800);
+          }
+        }
+      }
+    };
+
+    element.addEventListener('wheel', handleWheel, { passive: false });
+    element.addEventListener('touchstart', handleTouchStart, { passive: true });
+    element.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    return () => {
+      element.removeEventListener('wheel', handleWheel);
+      element.removeEventListener('touchstart', handleTouchStart);
+      element.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, []);
 
   const handleYearClick = (year: number) => {
     setActiveYear(year);
@@ -111,7 +192,7 @@ export default function Timeline() {
   const currentItem = timelineData.find(item => item.year === activeYear) || timelineData[timelineData.length - 1];
 
   return (
-    <section id="timeline" ref={sectionRef} className="relative h-[250vh] bg-[#050505] border-t border-white/10">
+    <section id="timeline" ref={sectionRef} className="relative h-[180vh] bg-[#050505] border-t border-white/10">
       <div className="sticky top-[75px] h-[calc(100vh-75px)] w-full flex flex-col justify-center py-6 px-4 md:px-8 overflow-y-auto select-none">
         {/* Decorative vertical line container background */}
         <div className="absolute top-0 bottom-0 left-1/2 -translate-x-1/2 w-px bg-white/5 hidden md:block pointer-events-none"></div>
